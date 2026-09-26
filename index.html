@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#111821">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<title>Battlefront: Reforged</title>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="lobby" class="screen">
+  <div class="topbar">
+    <div class="brand-mini">BATTLEFRONT // REFORGED</div>
+    <div class="account"><span>LV <b id="accountLevel">1</b></span><span>XP <b id="accountXp">0/75</b></span><span>WINS <b id="accountWins">0</b></span></div>
+  </div>
+
+  <div class="lobby-grid">
+    <section class="hero card">
+      <div class="kicker">TBBF-STYLE THIRD-PERSON BATTLE</div>
+      <h1>BATTLEFRONT<br><em>REFORGED</em></h1>
+      <p>You are the Tower. Or — after Level 500 — you are the Zombie. Cash buys Towers, upgrades, and one-life Zombie classes. Level gain comes from your own damage, not wins or bot work.</p><div class="milestone-strip"><span>LV 250 • ZED</span><span>LV 500 • ZOMBIE MODE + TWEETER</span><span>LV 750 • GOLDEN SCOUT + NECROMANCERS</span><span>LV 1500 • GOLDEN COMMANDO + BOSS5 + GUARDIAN</span><span>LV 2500 • ARCHER + KNIFER</span><span>LV 3000 • KINGS</span><span>LV 4000 • PLANET3ARTH</span><span>LV 5000 • COMMANDER</span><span>LV 6000 • GOLDEN ZED + LORDS</span></div>
+      <div class="eventline">
+        <div id="halloweenStatus" class="event halloween">🎃 HALLOWEEN FRONT • THROUGH NOV 1</div>
+        <div id="fallStatus" class="event fall">🍂 FALL FRONT • THROUGH DEC 1</div>
+      </div>
+    </section>
+
+    <section class="card selectors">
+      <h3>TEAM</h3>
+      <div class="seg" id="teamSelect">
+        <button class="active" data-team="tower">DEFENDERS</button>
+        <button data-team="zombie">ZOMBIES</button>
+      </div>
+
+      <h3>SERVER</h3>
+      <div class="seg" id="serverSelect">
+        <button class="active" data-server="public">PUBLIC SIMULATION</button>
+        <button data-server="private">PRIVATE SOLO • 0 BOTS</button>
+      </div>
+      <p id="serverHint" class="server-hint">Public Simulation fills empty slots with AI players.</p>
+
+      <h3>MODE</h3>
+      <div id="modeGrid" class="mode-grid">
+        <button class="mode active" data-mode="classic"><b>CLASSIC</b><span>40 waves • final Major: Void • 0 win XP</span></button>
+        <button class="mode" data-mode="hard"><b>HARDMODE</b><span>40 waves • Lords • final Major: Void2</span></button>
+        <button class="mode halloweenmode" data-mode="halloween"><b>🎃 HALLOWEEN ASSAULT</b><span>15 event waves • event Tower + Zombies</span></button>
+        <button class="mode fallmode" data-mode="fall"><b>🍂 AUTUMN SIEGE</b><span>20 event waves • event Tower + Zombies</span></button>
+        <button class="mode cursedmode" data-mode="cursed"><b>☠ CURSED</b><span>PRIVATE ONLY • randomized Towers/Zombies • no XP</span></button>
+        <button class="mode sandboxmode" data-mode="sandbox"><b>SANDBOX</b><span>PRIVATE ONLY • spawn Zombies • set wave/cash • no XP</span></button>
+      </div>
+    </section>
+
+    <section class="card maps">
+      <h3>MAP VOTE</h3>
+      <div id="mapGrid" class="map-grid"></div>
+    </section>
+
+    <section class="card roster">
+      <div class="section-head"><h3 id="rosterTitle">DEFENDER ROSTER</h3><span id="rosterHint">Choose your starting tower</span></div>
+      <div id="classGrid" class="class-grid"></div>
+    </section>
+  </div>
+
+  <div class="bottom-actions">
+    <button id="controlsBtn">CONTROLS</button>
+    <button id="eventBtn">EVENTS</button>
+    <button id="skinsBtn">SKINS</button>
+    <button id="bossIndexBtn">BOSS INDEX</button>
+    <button id="settingsBtn">SETTINGS</button>
+    <button id="resetBtn" class="danger">RESET SAVE</button>
+    <button id="deployBtn" class="deploy">DEPLOY TO FRONT</button>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div class="hud-top">
+    <div class="hudcluster">
+      <div class="hudbox"><small>WAVE</small><b id="waveLabel">1 / 40</b></div>
+      <div class="hudbox"><small>TIME</small><b id="timerLabel">00:45</b></div>
+      <div class="hudbox"><small>CASH</small><b id="cashLabel">$650</b></div>
+      <div class="hudbox"><small>TEAM</small><b id="teamLabel">DEFENDERS</b></div>
+      <div class="hudbox"><small>XP</small><b id="xpLabel">0 / 75</b></div>
+      <div class="hudbox"><small>HORDE</small><b id="hordeLabel">0 ACTIVE</b></div>
+    </div>
+    <div class="hudcluster right">
+      <div id="candyBox" class="hudbox eventbox halloween"><small>CANDY</small><b id="candyLabel">0</b></div>
+      <div id="leafBox" class="hudbox eventbox fall"><small>LEAVES</small><b id="leafLabel">0</b></div>
+    </div>
+  </div>
+
+  <div id="bossHud" class="boss-hud hidden">
+    <div class="boss-title"><span id="bossTier">KING</span><b id="bossName">KING BOSS 1</b></div>
+    <div class="bossbar"><i id="bossFill"></i></div>
+    <small id="bossHp">1000 / 1000</small><small id="majorClock" class="major-clock hidden">MAJOR TIMER 01:30</small>
+  </div>
+
+  <div id="waveBanner" class="wave-banner"></div>
+  <div id="killfeed" class="killfeed"></div>
+
+  <div class="player-card">
+    <div class="portrait" id="portrait">D</div>
+    <div class="player-info">
+      <b id="classLabel">SCOUT</b>
+      <div class="hpbar"><i id="hpFill"></i></div>
+      <small><span id="hpText">100/100</span> • <span id="ammoText">30/30</span></small>
+      <small id="nextTowerLabel" class="next-tower">NEXT: SCOUT</small>
+    </div>
+  </div>
+
+  <div class="abilities">
+    <div><kbd>Q</kbd><span id="qLabel">DASH</span><small id="qCd">READY</small></div>
+    <div><kbd>E</kbd><span id="eLabel">ABILITY</span><small id="eCd">READY</small></div>
+    <div><kbd>R</kbd><span>RELOAD</span><small id="rCd">READY</small></div>
+    <div><kbd>F</kbd><span>UPGRADE</span><small id="upgradeLabel">LV 1/5</small></div>
+    <div><kbd>TAB</kbd><span>ROSTER</span><small>SWAP</small></div>
+    <div id="sandboxHudBtn" class="hidden"><kbd>N</kbd><span>SANDBOX</span><small>MENU</small></div>
+  </div>
+
+  <button id="settingsHudBtn" class="settings-hud">⚙</button>
+  <button id="leaveBtn" class="leave">LEAVE</button>
+</div>
+
+<div id="rosterOverlay" class="overlay hidden">
+  <div class="window">
+    <button class="x" data-close="rosterOverlay">×</button>
+    <div class="section-head"><h2 id="swapTitle">DEFENDERS</h2><span>Swap after respawn or anytime in Sandbox</span></div>
+    <div id="swapGrid" class="class-grid large"></div>
+  </div>
+</div>
+
+<div id="sandboxOverlay" class="overlay hidden">
+  <div class="window sandbox-window">
+    <button class="x" data-close="sandboxOverlay">×</button>
+    <div class="section-head"><h2>SANDBOX CONTROL PANEL</h2><span>Testing disables XP and wins.</span></div>
+    <div class="sandbox-grid">
+      <div class="sandbox-card">
+        <h3>WORLD</h3>
+        <label>Set Wave <input id="sandboxWave" type="number" min="1" max="40" value="1"></label>
+        <label>Set Cash <input id="sandboxCash" type="number" min="0" max="99999999" value="999999"></label>
+        <button id="applySandbox">APPLY</button>
+        <button id="toggleGod">GOD MODE: OFF</button>
+        <button id="toggleAi">BOT AI: ON</button>
+        <button id="clearZombies">KILL ALL ZOMBIES</button>
+        <button id="healAll">HEAL EVERYONE</button>
+      </div>
+      <div class="sandbox-card">
+        <h3>SPAWN ZOMBIES</h3>
+        <label>Amount <input id="spawnAmount" type="number" min="1" max="50" value="1"></label>
+        <div id="sandboxSpawnGrid" class="spawn-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="controlsOverlay" class="overlay hidden">
+  <div class="window compact">
+    <button class="x" data-close="controlsOverlay">×</button>
+    <h2>CONTROLS</h2>
+    <div class="controls-grid">
+      <div><kbd>WASD</kbd><span>Move</span></div><div><kbd>MOUSE</kbd><span>Aim</span></div>
+      <div><kbd>LMB</kbd><span>Attack</span></div><div><kbd>SHIFT</kbd><span>Sprint</span></div>
+      <div><kbd>Q / E</kbd><span>Abilities</span></div><div><kbd>R</kbd><span>Reload</span></div>
+      <div><kbd>F</kbd><span>Upgrade current Tower</span></div><div><kbd>TAB</kbd><span>Buy / swap roster</span></div>
+      <div><kbd>N</kbd><span>Sandbox menu</span></div><div><kbd>SHIFT</kbd><span>Sprint</span></div>
+    </div>
+    <p>On iPad/mobile, twin-stick controls and ability buttons appear automatically.</p><p><b>XP:</b> mode wins give 0 XP. Only your own damage and eliminations earn XP; bot kills do not level you.</p><p><b>Zombie purchases:</b> paid Zombie classes cost money every use and enter cooldown after death. Major bosses cannot be played.</p><p><b>Private Solo:</b> there are ZERO fake player bots. It is a local solo server context for grinding your own damage XP. Sandbox and Cursed are private-only. A static GitHub build cannot host real invite-only online multiplayer without a backend.</p>
+  </div>
+</div>
+
+<div id="eventOverlay" class="overlay hidden">
+ <div class="window compact">
+  <button class="x" data-close="eventOverlay">×</button>
+  <h2>LIVE EVENTS</h2>
+  <div class="event-detail halloween"><b>🎃 Halloween Front</b><p>Through Nov 1, 2026. Vote Halloween Assault for 15 dedicated event waves, event Towers/Zombies, Candy rewards, pumpkins, gravestones and Halloween bosses.</p></div>
+  <div class="event-detail fall"><b>🍂 Fall Front</b><p>Through Dec 1, 2026. Vote Autumn Siege for 20 dedicated event waves, event Towers/Zombies, Leaves, hay bales, orange trees and an Autumn Lord.</p></div>
+ </div>
+</div>
+
+
+
+<div id="skinsOverlay" class="overlay hidden">
+  <div class="window">
+    <button class="x" data-close="skinsOverlay">×</button>
+    <div class="section-head"><h2>SKINS</h2><span>Rare Anomaly clears unlock special skins.</span></div>
+    <div id="skinGrid" class="skin-grid"></div>
+  </div>
+</div>
+
+
+<div id="bossIndexOverlay" class="overlay hidden">
+  <div class="window boss-index-window">
+    <button class="x" data-close="bossIndexOverlay">×</button>
+    <div class="section-head"><h2>BOSS / ZOMBIE INDEX</h2><span>Progression families in this remake</span></div>
+    <div class="index-note">Boss1–5 and Guardian are high-tier Zombies. Kings unlock at Level 3000, Lords at Level 6000, Planet3arth at Level 4000. Major bosses such as Void and Void2 are NPC-only.</div>
+    <div id="bossIndexGrid" class="boss-index-grid"></div>
+  </div>
+</div>
+
+<div id="settingsOverlay" class="overlay hidden">
+  <div class="window settings-window">
+    <button class="x" data-close="settingsOverlay">×</button>
+    <div class="section-head">
+      <h2>SETTINGS</h2>
+      <span>Yes. It actually goes to 2000%. 😭</span>
+    </div>
+
+    <div class="settings-section">
+      <h3>AUDIO</h3>
+
+      <label class="slider-row">
+        <span><b>MASTER VOLUME</b><small>Everything</small></span>
+        <input id="masterVolume" type="range" min="0" max="2000" step="10" value="100">
+        <output id="masterVolumeOut">100%</output>
+      </label>
+
+      <label class="slider-row">
+        <span><b>MUSIC VOLUME</b><small>Lobby, battle and boss music</small></span>
+        <input id="musicVolume" type="range" min="0" max="2000" step="10" value="100">
+        <output id="musicVolumeOut">100%</output>
+      </label>
+
+      <label class="slider-row">
+        <span><b>SFX VOLUME</b><small>Weapons, hits, UI, bosses and abilities</small></span>
+        <input id="sfxVolume" type="range" min="0" max="2000" step="10" value="100">
+        <output id="sfxVolumeOut">100%</output>
+      </label>
+
+      <div class="settings-buttons">
+        <button id="audioTestBtn">TEST SOUND</button>
+        <button id="audioResetBtn">RESET AUDIO</button>
+      </div>
+      <p class="setting-note">The extreme boost runs through a limiter so 2000% does not just become raw digital clipping.</p>
+    </div>
+
+    <div class="settings-section">
+      <h3>GAMEPLAY</h3>
+      <label class="slider-row">
+        <span><b>CAMERA SHAKE</b><small>0% = none, 200% = maximum</small></span>
+        <input id="shakeSetting" type="range" min="0" max="200" step="5" value="100">
+        <output id="shakeSettingOut">100%</output>
+      </label>
+      <label class="toggle-row">
+        <span><b>DAMAGE NUMBERS</b><small>Show damage above enemies</small></span>
+        <input id="damageNumbersSetting" type="checkbox" checked>
+      </label>
+    </div>
+  </div>
+</div>
+
+<div id="results" class="overlay hidden">
+  <div class="window result-window">
+    <div id="resultTag" class="result-tag">VICTORY</div>
+    <h1 id="resultTitle">VOID2 DEFEATED</h1>
+    <p id="resultSummary"></p>
+    <div class="results-grid six">
+      <div><small>PERSONAL XP</small><b id="resultXp">+0</b></div>
+      <div><small>TOWER REWARD</small><b id="resultTowerReward">—</b></div>
+      <div><small>ZOMBIE REWARD</small><b id="resultZombieReward">—</b></div>
+      <div><small>SECRET SKIN</small><b id="resultSkin">—</b></div>
+      <div><small>CANDY</small><b id="resultCandy">+0</b></div>
+      <div><small>LEAVES</small><b id="resultLeaves">+0</b></div>
+    </div>
+    <button id="returnBtn" class="deploy">RETURN TO LOBBY</button>
+  </div>
+</div>
+
+<div id="mobile" class="mobile hidden">
+  <div id="moveStick" class="stick"><i></i></div>
+  <div id="aimStick" class="stick aim"><i></i></div>
+  <button id="mobileQ">Q</button>
+  <button id="mobileE">E</button>
+  <button id="mobileR">R</button>
+  <button id="mobileUpgrade">UPGRADE</button>
+  <button id="mobileRoster">☰</button>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
